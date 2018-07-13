@@ -19,13 +19,13 @@ class TableViewCell: UITableViewCell {
     
     private var inActiveColor = UIColor(white: 0.9, alpha: 1)
     
+    private var _bag = DisposeBag()
+    
     @IBOutlet weak var name: UILabel!
     
     @IBOutlet weak var value: UITextField!
     
     @IBOutlet weak var underLine: UIView!
-    
-    var disposeBag = DisposeBag()
     
     override func awakeFromNib() {
         
@@ -37,7 +37,7 @@ class TableViewCell: UITableViewCell {
     
     override func prepareForReuse() {
         
-        disposeBag = DisposeBag()
+        _bag = DisposeBag()
         setupTextFieldObserver()
         
         name.text = ""
@@ -51,14 +51,14 @@ class TableViewCell: UITableViewCell {
                 
                 self.underLine.backgroundColor = UIColor.lightGray
                 
-            }.disposed(by: disposeBag)
+            }.disposed(by: _bag)
         
         value.rx.controlEvent([.editingDidEnd])
             .bind { [unowned self] _ in
                 
                 self.underLine.backgroundColor = self.inActiveColor
                 
-            }.disposed(by: disposeBag)
+            }.disposed(by: _bag)
     }
 }
 
@@ -77,7 +77,7 @@ extension TableViewCell {
             currency.observableValue
                 .flatMap({ Observable.just(self.formatValue($0)) })
                 .bind(to: value.rx.text)
-                .disposed(by: disposeBag)
+                .disposed(by: _bag)
             
         case .baseCurrency(let currency):
             
@@ -87,7 +87,7 @@ extension TableViewCell {
             
             value.rx.text.orEmpty
                 .bind(onNext: { currency.quantity = Double($0) ?? 0 })
-                .disposed(by: disposeBag)
+                .disposed(by: _bag)
         }
     }
     
