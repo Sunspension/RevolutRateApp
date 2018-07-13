@@ -7,30 +7,46 @@
 //
 
 import XCTest
+import RxSwift
+import RxTest
+
 @testable import RevolutRateApp
 
 class RevolutRateAppTests: XCTestCase {
     
-    override func setUp() {
-        super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+    private let _bag = DisposeBag()
+    
+    private lazy var api = API()
+    
+    private lazy var mainViewModel = MainViewModel(api: api)
+    
+    func testApiRequest() {
+        
+        let promise = expectation(description: "waiting rates")
+        
+        api.rates().subscribe(onSuccess: { response in
+            
+            XCTAssert(response.rates.count > 0)
+            promise.fulfill()
+            
+        }, onError: { _ in XCTFail() }).disposed(by: _bag)
+        
+        waitForExpectations(timeout: 5) { error in print(error ?? "") }
     }
     
-    override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
-        super.tearDown()
+    func testMainViewModel() {
+        
+        let promise = expectation(description: "waiting rates")
+        
+        mainViewModel.observableRates.bind { rates in
+            
+            XCTAssert(rates.currencies.count > 0)
+            promise.fulfill()
+            
+        }.disposed(by: _bag)
+        
+        mainViewModel.currencyRequest()
+        
+        waitForExpectations(timeout: 5) { error in print(error ?? "") }
     }
-    
-    func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-    }
-    
-    func testPerformanceExample() {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
-    }
-    
 }
