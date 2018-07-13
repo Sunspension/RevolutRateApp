@@ -107,6 +107,7 @@ class TableViewController: UITableViewController {
         if let cell = tableView.cellForRow(at: IndexPath(row: 0, section: 0)) as? TableViewCell {
             
             cell.configure(.baseCurrency(currency: rates.baseCurrency))
+            cell.value.becomeFirstResponder()
             viewModel.observableBaseCurrencyRatio = cell.value.rx.text.orEmpty.asObservable()
         }
     }
