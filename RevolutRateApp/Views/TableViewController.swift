@@ -70,7 +70,12 @@ class TableViewController: UITableViewController {
         
         tableView.deselectRow(at: indexPath, animated: true)
         
-        if indexPath.section == 0 { return }
+        if indexPath.section == 0 {
+            
+            let cell = tableView.cellForRow(at: indexPath) as! TableViewCell
+            cell.value.becomeFirstResponder()
+            return
+        }
         
         tableView.beginUpdates()
         
